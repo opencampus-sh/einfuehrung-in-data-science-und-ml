@@ -1,0 +1,113 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+neue Version
+
+Einbinden benötigter Bibliotheken
+```{r}
+library(readr)
+library(dplyr)
+library(skimr)
+
+# Es wird überprüft ob "devtools" installiert ist; devtools ist ein Package, um Package von GitHub zu installieren
+if (!require(devtools)) install.packages("devtools")
+# Es wird überprüft, ob das Package DataExplorer bereits installiert ist, ansonsten wird es von GitHub installiert
+if (!require(DataExplorer)) devtools::install_github("boxuancui/DataExplorer")
+
+library(DataExplorer)
+
+```
+
+
+Einlesen der Daten
+```{r}
+umsatzdaten <- read_csv("https://raw.githubusercontent.com/opencampus-sh/wise20-datascience/main/umsatzdaten_gekuerzt.csv")
+kiwo <- read_csv("https://raw.githubusercontent.com/opencampus-sh/wise20-datascience/main/kiwo.csv")
+
+
+```
+
+
+Zusammenführen der Daten
+```{r}
+daten <- left_join(umsatzdaten, kiwo, by="Datum")
+
+```
+
+
+```{r}
+library(ggplot2) # Einbinden von ggplot2, um den darin enthaltenen Datensatz mpg zu nutzen
+library(dplyr)
+library(lubridate)
+library(stringr)
+
+
+#### Gruppenweise Ausführung eines T-Tests ####
+mpg %>%
+  group_by(cyl) %>%
+  summarise(n(), t.test(cty,hwy)$p.value)
+```
+
+
+```{r}
+#### Beispiel für die Aufbereitung mit dplyr ####
+mpg %>%
+  select (class, hwy, cty) %>%    # Beschränkung des mpg Datensatzes auf die Variablen class, hwy und cty
+  filter (class=="suv") %>%       # Beschränkung des Datensatzes auf alle Fälle (Cases), bei denen die Variable class dem Wert 'suv' entspricht
+  mutate (mix = .5*hwy + .5*cty)  # Berechnen und Hinzufügen einer neuen Variable mit dem Namen mix und den entsprechend berechneten Werten
+```
+
+
+```{r}
+#### Beispiel für die Aufbereitung mit lubridate #### 
+mdy("4/1/17")  # Umwandlung eines Strings in ein Datum
+```
+
+
+```{r}
+#### Beispiel 1 für die Aufbereitung/Transformation mit stringr #### 
+str_replace("AAA", "A", "B")
+```
+
+```{r}
+#### Beispiel 2 für die Aufbereitung/Transformation mit stringr #### 
+str_replace_all("AAA", "A", "B")
+```
+
+
+```{r}
+#### Beispiel 3 für die Aufbereitung/Transformation mit stringr #### 
+str_replace("AAA", "A$", "B")
+```
+
+
+```{r}
+#### Beispiel 4 für die Aufbereitung/Transformation mit stringr #### 
+str_trim("   Vorname   ")
+```
+
+
+```{r}
+#### Beispiel 5 für die Aufbereitung/Transformation mit stringr #### 
+str_replace("   Vorname   ", "^\\s+ || \\s+$", "")
+
+```
+
+```{r}
+#### Beispiel für die Nutzung von skim
+umsatzdaten$Warengruppe = as.factor(umsatzdaten$Warengruppe)
+skim(umsatzdaten)
+
+```
+
+```{r}
+library(DataExplorer)
+
+plot_missing(umsatzdaten)
+plot_histogram(umsatzdaten)
+
+```
+
