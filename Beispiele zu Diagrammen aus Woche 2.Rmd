@@ -1,0 +1,60 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Einbinden benötigter Bibliotheken
+```{r}
+
+library(ggplot2)
+
+```
+
+
+Scatterplot, der den Zusammenhang der angegeben Reichweiten (miles per gallon) von Autos in der Stadt (cty) und auf dem Land (hwy) darstellet und als zusätzlich dritte Dimension farblich die Hubraumgröße darstellt.
+```{r}
+
+ggplot(mpg)+
+  geom_point(aes(x = hwy, y = cty, color = displ))
+
+```
+
+
+Histogramm, das die Verteilung der angegebenen Reichweiten von Autos auf dem Land darstellt.
+```{r}
+
+ggplot(mpg)+
+  geom_histogram(aes(x = cty))
+
+
+```
+
+
+Balkendiagramm, das den Zusammenhang von angegebener Reichweite in der Stadt und Autotyp darstellt.
+```{r}
+
+ggplot(mpg)+
+  geom_bar(aes(x = as.factor(class), y = cty), stat = "identity")
+
+```
+
+
+Verwendung eines Facet-Layers (in der Variante "wrap"), um im oben dargestellten Histogramm Unterschiede nach Fahrzeugtyp zu betrachten
+```{r}
+
+ggplot(mpg) +
+  facet_wrap(~class) +
+  geom_point(aes(x = hwy, y = cty))
+
+```
+
+
+Verwendung des Themes "classic" für einen schlicht weissen Hintergrund des Diagramms
+```{r}
+
+ggplot(mpg)+
+  theme_classic()+
+  geom_point(aes(x = hwy, y = cty, color = displ))
+
+```
+
