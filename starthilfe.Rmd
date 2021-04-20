@@ -1,0 +1,23 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+# Import needed libraries
+
+library(readr)
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+
+# Import turnover data
+umsatzdaten <- read_csv("https://raw.githubusercontent.com/opencampus-sh/wise20-datascience/main/umsatzdaten_gekuerzt.csv")
+
+# Create variable weekday
+umsatzdaten$wochentag <- weekdays(umsatzdaten$Datum)
+
+
+```
+
