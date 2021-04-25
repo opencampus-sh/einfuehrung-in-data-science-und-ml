@@ -13,7 +13,7 @@ library(ggplot2)
 library(dplyr)
 
 # Import turnover data
-umsatzdaten <- read_csv("https://raw.githubusercontent.com/opencampus-sh/wise20-datascience/main/umsatzdaten_gekuerzt.csv")
+umsatzdaten <- read_csv("https://raw.githubusercontent.com/opencampus-sh/einfuehrung-in-data-science-und-ml/main/umsatzdaten_gekuerzt.csv")
 
 # Create variable weekday
 umsatzdaten$wochentag <- weekdays(umsatzdaten$Datum)
