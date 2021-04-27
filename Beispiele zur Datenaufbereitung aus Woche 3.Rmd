@@ -92,7 +92,7 @@ str_trim("   Vorname   ")
 
 ```{r}
 #### Beispiel 5 für die Aufbereitung/Transformation mit stringr #### 
-str_replace("   Vorname   ", "^\\s+ || \\s+$", "")
+str_replace_all("   Vorna me   ","^[ \\s]+|[ \\s]+$", "")
 
 ```
 
