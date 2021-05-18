@@ -19,11 +19,15 @@ house_pricing <- read_csv("house_pricing.csv")
 ```
 
 
-## Aufteilung des Datensatzes in Trainings- und Validierungsdaten
+## Splitting Training and Test Data
 
 ```{r}
 # Setting the random counter to a fixed value, so the random initialization stays the same (the random split is always the same)
 set.seed(1)
+
+# Shuffling the dataset (to get random orders within each dataset as well)
+new_row_order <- sample(nrow(house_pricing))
+house_pricing <- house_pricing[, new_row_order]
 
 # Assign each row number in the full dataset randomly to one of the three groups of datasets
 # The probability of being in one of the groups results then in crresponding group sizes
@@ -47,13 +51,13 @@ train_dataset <- sample_frac(train_dataset, .10)
 ## Training the SVM
 
 ```{r}
-# Estimation of an SVM with optimized weighting parameters and given standard hyper parameters
-# Typically not used; instead, the function svm_tune is used in order to also get a model with optimized hyper parameters
+# Optimization of an SVM with standard hyper parameters
+# Typically NOT used; Instead, the function svm_tune() is used in order to also get a model with optimized hyper parameters
 model_svm <- svm(price ~ bathrooms, train_dataset)
 ```
 
 ```{r}
-# Estimation of various SVM (each with optimized weighting parameters) using systematically varied hyper parameters (typically called 'grid search' approach) and cross validation
+# Optimization of various SVM using systematically varied hyper parameters (typically called 'grid search' approach) and cross validation
 # the resulting object includes the optimal model in the element named 'best.model'
 svm_tune <- tune(svm, price ~ bedrooms + bathrooms + sqft_living + zipcode, data=train_dataset,
                  ranges = list(epsilon = seq(0.2,1,0.1), cost = 2^(2:3)))
