@@ -6,7 +6,7 @@
 remove(list = ls())
 
 # Create list with needed libraries
-pkgs <- c("readr", "fastDummies")
+pkgs <- c("readr", "fastDummies", "reticulate", "ggplot2", "Metrics")
 
 # Load each listed library and check if it is installed and install if necessary
 for (pkg in pkgs) {
@@ -22,7 +22,7 @@ for (pkg in pkgs) {
 
 # Reading the data file
 house_pricing <- read_csv("https://raw.githubusercontent.com/opencampus-sh/einfuehrung-in-data-science-und-ml/main/house_pricing_data/house_pricing_train.csv")
-
+names(house_pricing)
 
 ###################################################
 ### Data Preparation ####
@@ -30,6 +30,7 @@ house_pricing <- read_csv("https://raw.githubusercontent.com/opencampus-sh/einfu
 # Recoding of the variables into one-hot encoded (dummy) variables
 dummy_list <- c("view", "condition")
 house_pricing_dummy = dummy_cols(house_pricing, dummy_list)
+names(house_pricing_dummy)
 
 # Definition of lists for each one-hot encoded variable (just to make the handling easier)
 condition_dummies = c('condition_1', 'condition_2', 'condition_3', 'condition_4', 'condition_5')
@@ -55,12 +56,12 @@ str(house_pricing_dummy)
 # Setting the random counter to a fixed value, so the random initialization stays the same (the random split is always the same)
 set.seed(1)
 
-# Shuffling the dataset (to get random orders within each dataset as well)
+# Shuffling the dataset (to get a random order)
 new_row_order <- sample(nrow(house_pricing_dummy))
 house_pricing_dummy <- house_pricing_dummy[new_row_order, ]
 
 # Assign each row number in the full dataset randomly to one of the three groups of datasets
-# The probability of being in one of the groups results then in crresponding group sizes
+# The probability of being in one of the groups results then in corresponding group sizes
 assignment <- sample(1:3, size = nrow(house_pricing_dummy), prob = c(.7, .2, .1), replace = TRUE)
 
 # Create training, validation and test data for the features and the labels
