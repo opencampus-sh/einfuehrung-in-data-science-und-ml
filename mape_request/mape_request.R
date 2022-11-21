@@ -9,7 +9,6 @@ predictions <- read_csv("prediction_template.csv")
 # anonymous prediction
 name <- "Gruppe X"
 
-
 # Execution of the request
 r <- POST("https://bakery-sales-mape-tolicqztoq-ey.a.run.app/", 
           body = list(name=name, predictions=predictions),
