@@ -29,7 +29,7 @@ names(house_pricing)
 
 # Recoding of the variables into one-hot encoded (dummy) variables
 dummy_list <- c("view", "condition")
-house_pricing_dummy = dummy_cols(house_pricing, dummy_list)
+house_pricing_dummy <- dummy_cols(house_pricing, select_columns=dummy_list)
 names(house_pricing_dummy)
 
 # Definition of lists for each one-hot encoded variable (just to make the handling easier)
@@ -56,13 +56,10 @@ str(house_pricing_dummy)
 # Setting the random counter to a fixed value, so the random initialization stays the same (the random split is always the same)
 set.seed(1)
 
-# Shuffling the dataset (to get a random order)
-new_row_order <- sample(nrow(house_pricing_dummy))
-house_pricing_dummy <- house_pricing_dummy[new_row_order, ]
-
-# Assign each row number in the full dataset randomly to one of the three groups of datasets
-# The probability of being in one of the groups results then in corresponding group sizes
-assignment <- sample(1:3, size = nrow(house_pricing_dummy), prob = c(.7, .2, .1), replace = TRUE)
+# Assign each row number in the full dataset randomly to one of the two groups (i.e. either training or validation dataset)
+# Thereby the samples are randomly shuffled and 
+# the probability of being in one of the groups results in corresponding group sizes
+assignment <- sample(1:2, size = nrow(house_pricing_dummy), prob = c(.8, .2), replace = TRUE)
 
 # Create training, validation and test data for the features and the labels
 training_features <- house_pricing_dummy[assignment == 1, features]    # subset house_pricing to training indices only
@@ -70,7 +67,4 @@ training_labels <- house_pricing_dummy[assignment == 1, labels]    # subset hous
 
 validation_features <- house_pricing_dummy[assignment == 2, features]  # subset house_pricing to validation indices only
 validation_labels <- house_pricing_dummy[assignment == 2, labels]  # subset house_pricing to validation indices only
-
-test_features <- house_pricing_dummy[assignment == 3, features]   # subset house_pricing to test indices only
-test_labels <- house_pricing_dummy[assignment == 3, labels]   # subset house_pricing to test indices only
 
