@@ -3,18 +3,63 @@ title: "Linear Regression"
 output: html_notebook
 ---
 
-
+#### Importieren des Datensatzes
 ```{r}
 library(readr)
-house_pricing <- read_csv("https://raw.githubusercontent.com/opencampus-sh/einfuehrung-in-data-science-und-ml/main/house_pricing_data/house_pricing_train.csv")
+data <- read_csv("https://raw.githubusercontent.com/opencampus-sh/einfuehrung-in-data-science-und-ml/main/house_pricing_data/house_pricing_train.csv")
+```
+
+
+#### Teilen des Datensatzes in Trainings- Validierungs- und Testdatensatz
+```{r}
+# Load the dplyr library
+library(dplyr)
+
+# Set a random seed for reproducibility
+set.seed(42)
+# Shuffle the data
+data_shuffled <- data %>% sample_frac(1)
+
+# Calculate the number of rows for each dataset
+n_total <- nrow(data)
+n_train <- floor(0.7 * n_total)
+n_validation <- floor(0.20 * n_total)
+
+# Split the data into training, validation, and test datasets
+train_data <- data_shuffled %>% slice(1:n_train)
+validation_data <- data_shuffled %>% slice((n_train + 1):(n_train + n_validation))
+test_data <- data_shuffled %>% slice((n_train + n_validation + 1):n_total)
+
+# Check the dimensions of the datasets
+cat("Training dataset dimensions:", dim(train_data), "\n")
+cat("Validation dataset dimensions:", dim(validation_data), "\n")
+cat("Test dataset dimensions:", dim(test_data), "\n")
+
 ```
 
 
 
 ### Beispiel einer einfachen linearen Regression
 ```{r}
-mod <- lm(price ~ sqft_lot15 + as.factor(condition), house_pricing)
-summary(mod)
+  mod <- lm(price ~ sqft_lot15 + as.factor(condition), train_data)
+  summary(mod)
+
+```
+
+### Nutzung des resultierenden Modells für eine Vohersage
+```{r}
+# Make predictions using the test data
+predicted_values <- predict(mod, newdata = validation_data)
+
+# Compare the predicted values with the actual values
+comparison <- data.frame(Actual = test_data$price, Predicted = predicted_values)
+
+# Calculate the mean squared error (RMSE)
+rmse <- sqrt(mean((comparison$Actual - comparison$Predicted)^2))
+
+# Display the comparison and RMSE
+head(comparison)
+cat("Root Mean Squared Error (RMSE):", rmse, "\n")
 
 ```
 
@@ -23,7 +68,7 @@ summary(mod)
 ### Beispiel einer linearen Regression mit Regularisierung
 ```{r}
 library(glmnet)
-mod <- glmnet(as.matrix(house_pricing[c('sqft_lot15', 'condition')]), house_pricing$price)
+mod <- glmnet(as.matrix(train_data[c('sqft_lot15', 'condition')]), train_data$price)
 mod
 
 ```
