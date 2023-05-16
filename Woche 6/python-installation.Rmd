@@ -3,27 +3,70 @@ title: "R Notebook"
 output: html_notebook
 ---
 
+
 ### Installation von Python und der für TensorFlow benötigten Pakete (nur einmalig nötig) ###
 
 ```{r}
 install.packages("reticulate")
 library(reticulate)
 
-# Installation von miniconda (falls nicht vorhanden)
-install_miniconda(update=TRUE)
+# Check if conda is installed, if not, install miniconda
+if (!conda_exists()) {
+  install_miniconda()
+}
+
+# Create a specific Python environment if it doesn't exist
+if (!condaenv_exists("r-reticulate")) {
+  conda_create("r-reticulate", python_version = "3.8")
+}
+
+# Install required packages in the created environment
+required_packages <- c("pandas", "numpy", "tensorflow", "h5py")
+installed_packages <- conda_list("r-reticulate")$name
+
+for (pkg in required_packages) {
+  if (!(pkg %in% installed_packages)) {
+    conda_install("r-reticulate", pkg)
+  }
+}
+
+# Use the created Python environment
+use_condaenv("r-reticulate", required = TRUE)
+```
 
 
-# Anlegen einer speziellen Python Umgebung
-conda_create("r-reticulate", python_version = "3.8" )
 
-# Installieren der Pakete in der angelegten Umgebung
-conda_install("r-reticulate", "pandas")
-conda_install("r-reticulate", "numpy")
-conda_install("r-reticulate", "tensorflow")
-conda_install("r-reticulate", "h5py")
+### Potentielle Alterbative für Windows ###
+#### Nur ausführen, wenn die Variante oben fehl schlägt. ####
+```{r}
+install.packages("reticulate")
+library(reticulate)
 
-# Verwenden der speziellen Python Umgebung die zuvor erstellt wurde
-use_condaenv("r-reticulate")
+# Check if conda is installed, if not, install miniconda
+if (!conda_exists()) {
+  install_miniconda()
+}
+
+# Set custom path for the conda environment
+custom_path <- "C:/conda_envs" # Change this path as needed
+
+# Create a specific Python environment if it doesn't exist
+if (!condaenv_exists("r-reticulate", condaenvs_dir = custom_path)) {
+  conda_create("r-reticulate", python_version = "3.8", condaenvs_dir = custom_path)
+}
+
+# Install required packages in the created environment
+required_packages <- c("pandas", "numpy", "tensorflow", "h5py")
+installed_packages <- conda_list("r-reticulate", condaenvs_dir = custom_path)$name
+
+for (pkg in required_packages) {
+  if (!(pkg %in% installed_packages)) {
+    conda_install("r-reticulate", pkg, condaenvs_dir = custom_path)
+  }
+}
+
+# Use the created Python environment
+use_condaenv("r-reticulate", condaenvs_dir = custom_path, required = TRUE)
 
 ```
 
