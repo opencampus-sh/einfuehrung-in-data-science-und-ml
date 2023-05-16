@@ -52,7 +52,7 @@ cat("Test dataset dimensions:", dim(test_data), "\n")
 predicted_values <- predict(mod, newdata = validation_data)
 
 # Compare the predicted values with the actual values
-comparison <- data.frame(Actual = test_data$price, Predicted = predicted_values)
+comparison <- data.frame(Actual = validation_data$price, Predicted = predicted_values)
 
 # Calculate the mean squared error (RMSE)
 rmse <- sqrt(mean((comparison$Actual - comparison$Predicted)^2))
