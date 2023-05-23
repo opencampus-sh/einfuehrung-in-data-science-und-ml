@@ -1,0 +1,114 @@
+---
+title: "Linear Regression"
+output: html_notebook
+---
+
+#### Importieren des Datensatzes
+```{r}
+library(readr)
+data <- read_csv("https://raw.githubusercontent.com/opencampus-sh/einfuehrung-in-data-science-und-ml/main/house_pricing_data/house_pricing_train.csv")
+```
+
+
+#### Aufbereitung des Datensatzes
+```{r}
+# Load the dplyr library
+library(dplyr)
+
+# preparation of independent variables (dummy coding of categorical variables)
+features <- as_tibble(model.matrix(price ~ as.factor(bathrooms) + as.factor(zipcode) + as.factor(condition) + sqft_living15, data))
+
+# Construction of prepared data set
+prepared_data <- tibble(price=data$price, features)
+
+```
+
+
+#### Teilen des Datensatzes in Trainings- Validierungs- und Testdatensatz
+```{r}
+
+
+# Set a random seed for reproducibility
+set.seed(42)
+# Shuffle the data
+prepared_data_shuffled <- prepared_data %>% sample_frac(1)
+
+
+# Calculate the number of rows for each dataset
+n_total <- nrow(prepared_data_shuffled)
+n_train <- floor(0.7 * n_total)
+n_validation <- floor(0.20 * n_total)
+
+
+# Split the features and labels for training, validation, and test
+train_features <-
+  prepared_data_shuffled %>% select(-price) %>% slice(1:n_train)
+validation_features <-
+  prepared_data_shuffled %>% select(-price) %>% slice((n_train + 1):(n_train + n_validation))
+test_features <-
+  prepared_data_shuffled %>% select(-price) %>% slice((n_train + n_validation + 1):n_total)
+
+train_label <-
+  prepared_data_shuffled %>% select(price) %>% slice(1:n_train)
+validation_label <-
+  prepared_data_shuffled %>% select(price) %>% slice((n_train + 1):(n_train + n_validation))
+test_label <-
+  prepared_data_shuffled %>% select(price) %>% slice((n_train + n_validation + 1):n_total)
+
+
+# Check the dimensions of the datasets
+cat("Training features dimensions:", dim(train_features), "\n")
+cat("Validation features dimensions:",
+    dim(validation_features),
+    "\n")
+cat("Test features dimensions:", dim(test_features), "\n")
+cat("\n")
+cat("Training label dimensions:", dim(train_label), "\n")
+cat("Validation label dimensions:", dim(validation_label), "\n")
+cat("Test label dimensions:", dim(test_label), "\n")
+
+```
+
+
+### Beispiel einer linearen Regression mit Regularisierung
+```{r}
+library(glmnet)
+
+# Reformat features and label from tibble to matrices as expected by glmnet
+train_features_matrix <- as.matrix(train_features)
+train_label_matrix <- as.matrix(train_label)
+                                   
+# Calibration of linear regressions with regularisation
+mod1 <- glmnet(x=train_features_matrix, y=train_label_matrix, lambda=.1)
+mod1
+
+# Calibration of linear regressions with regularisation
+mod2 <- glmnet(x=train_features_matrix, y=train_label_matrix, lambda=10000)
+mod2
+
+```
+
+
+### Nutzung des resultierenden Modells für eine Vohersage
+```{r}
+library(Metrics)
+
+# Reformat features and label from tibble to matrices as expected by glmnet
+validation_features_matrix <- as.matrix(validation_features)
+validation_label_matrix <- as.matrix(validation_label)
+
+# Make predictions using the test data
+predicted_values_mod1 <- predict(mod1, newx = validation_features_matrix)[,1]
+predicted_values_mod2 <- predict(mod2, newx = validation_features_matrix)[,1]
+
+
+
+# Calculate the mean squared errors (RMSE)
+mape_mod1 <- mape(actual=validation_label_matrix, predicted=predicted_values_mod1)
+mape_mod2 <- mape(actual=validation_label_matrix, predicted=predicted_values_mod2)
+
+# Display RMSEs
+cat("Mean absolute Percentage Error (MAPE) of Model 1:", mape_mod1, "\n")
+cat("Mean absolute Percentage Error (MAPE) of Model 2:", mape_mod2, "\n")
+
+```
