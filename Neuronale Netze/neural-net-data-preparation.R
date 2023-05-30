@@ -6,7 +6,7 @@
 remove(list = ls())
 
 # Create list with needed libraries
-pkgs <- c("readr", "fastDummies", "reticulate", "ggplot2", "Metrics")
+pkgs <- c("readr", "dplyr", "reticulate", "ggplot2", "Metrics")
 
 # Load each listed library and check if it is installed and install if necessary
 for (pkg in pkgs) {
@@ -17,54 +17,73 @@ for (pkg in pkgs) {
 }
 
 
+
+
 ###################################################
 ### Data Import ####
 
 # Reading the data file
-house_pricing <- read_csv("https://raw.githubusercontent.com/opencampus-sh/einfuehrung-in-data-science-und-ml/main/house_pricing_data/house_pricing_train.csv")
-names(house_pricing)
+data <- read_csv("https://raw.githubusercontent.com/opencampus-sh/einfuehrung-in-data-science-und-ml/main/house_pricing_data/house_pricing_train.csv")
+names(data)
+
+
+
 
 ###################################################
 ### Data Preparation ####
 
-# Recoding of the variables into one-hot encoded (dummy) variables
-dummy_list <- c("view", "condition")
-house_pricing_dummy <- dummy_cols(house_pricing, select_columns=dummy_list)
-names(house_pricing_dummy)
+# Preparation of independent variables ('features') by dummy coding the categorical variables
+features <- as_tibble(model.matrix(price ~ as.factor(bathrooms) + as.factor(zipcode) + as.factor(condition) + sqft_living15, data))
+names(features)
 
-# Definition of lists for each one-hot encoded variable (just to make the handling easier)
-condition_dummies = c('condition_1', 'condition_2', 'condition_3', 'condition_4', 'condition_5')
-view_dummies = c('view_0', 'view_1', 'view_2', 'view_3','view_4')
+# Construction of prepared data set 
+prepared_data <- tibble(label=data$price, features) %>%  # inclusion of the dependent variable ('label')
+    filter(complete.cases(.)) # Handling of missing values (here: only keeping rows without missing values)
 
 
-###################################################
-### Selection of the Feature Variables and the Label Variable ####
-
-# Selection of the features (the independent variables used to predict the dependent)
-#features <- c('sqft_lot', 'waterfront', 'grade', 'bathrooms', view_dummies, condition_dummies)
-features <- c('sqft_lot', 'waterfront', 'grade', 'bathrooms', condition_dummies, view_dummies)
-# Selection of the label (the dependent variable)
-labels <- 'price'
 
 
 ###################################################
 ### Selection of Training, Validation and Test Data ####
 
-# Look at the data
-str(house_pricing_dummy)
+# Set a random seed for reproducibility
+set.seed(42)
+# Shuffle the data
+prepared_data_shuffled <- prepared_data %>% sample_frac(1)
 
-# Setting the random counter to a fixed value, so the random initialization stays the same (the random split is always the same)
-set.seed(1)
 
-# Assign each row number in the full dataset randomly to one of the two groups (i.e. either training or validation dataset)
-# Thereby the samples are randomly shuffled and 
-# the probability of being in one of the groups results in corresponding group sizes
-assignment <- sample(1:2, size = nrow(house_pricing_dummy), prob = c(.8, .2), replace = TRUE)
+# Calculate the number of rows for each dataset
+n_total <- nrow(prepared_data_shuffled)
+n_training <- floor(0.7 * n_total)
+n_validation <- floor(0.20 * n_total)
 
-# Create training, validation and test data for the features and the labels
-training_features <- house_pricing_dummy[assignment == 1, features]    # subset house_pricing to training indices only
-training_labels <- house_pricing_dummy[assignment == 1, labels]    # subset house_pricing to training indices only
 
-validation_features <- house_pricing_dummy[assignment == 2, features]  # subset house_pricing to validation indices only
-validation_labels <- house_pricing_dummy[assignment == 2, labels]  # subset house_pricing to validation indices only
+# Split the features and labels for training, validation, and test
+training_features <-
+  prepared_data_shuffled %>% select(-label) %>% slice(1:n_training)
+validation_features <-
+  prepared_data_shuffled %>% select(-label) %>% slice((n_training + 1):(n_training + n_validation))
+test_features <-
+  prepared_data_shuffled %>% select(-label) %>% slice((n_training + n_validation + 1):n_total)
+
+training_label <-
+  prepared_data_shuffled %>% select(label) %>% slice(1:n_training)
+validation_label <-
+  prepared_data_shuffled %>% select(label) %>% slice((n_training + 1):(n_training + n_validation))
+test_label <-
+  prepared_data_shuffled %>% select(label) %>% slice((n_training + n_validation + 1):n_total)
+
+
+# Check the dimensions of the dataframes
+cat("Training features dimensions:", dim(training_features), "\n")
+cat("Validation features dimensions:",
+    dim(validation_features),
+    "\n")
+cat("Test features dimensions:", dim(test_features), "\n")
+cat("\n")
+cat("Training label dimensions:", dim(training_label), "\n")
+cat("Validation label dimensions:", dim(validation_label), "\n")
+cat("Test label dimensions:", dim(test_label), "\n")
+
+###################################################
 

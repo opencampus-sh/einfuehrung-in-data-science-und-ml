@@ -5,30 +5,6 @@ output:
     df_print: paged
 ---
 
-### Installation von Python und TensorFlow (nur einmalig nötig)
-```{r}
-install.packages("reticulate")
-library(reticulate)
-
-# Installation von miniconda (falls nicht vorhanden)
-install_miniconda(update=TRUE)
-
-# Anlegen einer speziellen Python Umgebung
-conda_create("r-reticulate")
-
-# Installieren der Pakete in der angelegten Umgebung
-conda_install("r-reticulate", "pandas")
-conda_install("r-reticulate", "numpy")
-conda_install("r-reticulate", "tensorflow")
-conda_install("r-reticulate", "h5py")
- 
-# Verwenden der speziellen Python Umgebung die zuvor erstellt wurde
-use_condaenv("r-reticulate")
-
-
-
-```
-
 
 ### Aufruf des Skripts zur Datenaufbereitung
 ```{r, include=FALSE}
@@ -52,11 +28,9 @@ model = Sequential([
   InputLayer(input_shape=(len(r.training_features.keys()), )),
   BatchNormalization(),
   Dense(10, activation='relu'),
-  Dropout(.2),
   Dense(4, activation='relu'),
   Dense(1)
 ])
-
 
 # Ausgabe einer Zusammenfassung zur Form des Modells, das geschaetzt wird (nicht notwendig)
 model.summary()
@@ -72,8 +46,8 @@ model.summary()
 model.compile(loss="mse", optimizer=Adam(learning_rate=0.001))
 
 # Schaetzung des Modells
-history = model.fit(r.training_features, r.training_labels, epochs=100,
-                    validation_data = (r.validation_features, r.validation_labels), verbose=0)
+history = model.fit(r.training_features, r.training_label, epochs=200,
+                    validation_data = (r.validation_features, r.validation_label), verbose=0)
 
 # Ggf. Speichern des geschaetzten Modells
 model.save("python_model.h5")
@@ -114,11 +88,13 @@ model = tf.keras.models.load_model("python_model.h5")
 # Schätzung der (normierten) Preise für die Trainings- und Testdaten
 training_predictions <- py$model$predict(training_features)
 validation_predictions <- py$model$predict(validation_features)
+test_predictions <- py$model$predict(test_features)
+
 
 
 # Vergleich der Gütekriterien für die Traingings- und Testdaten
-cat(paste0("MAPE on the Training Data:\t", format(mape(training_labels[[1]], training_predictions)*100, digits=3, nsmall=2)))
-cat(paste0("\nMAPE on the Validation Data:\t", format(mape(validation_labels[[1]], validation_predictions)*100, digits=3, nsmall=2)))
+cat(paste0("MAPE on the Training Data:\t", format(mape(training_label[[1]], training_predictions)*100, digits=3, nsmall=2)))
+cat(paste0("\nMAPE on the Validation Data:\t", format(mape(validation_label[[1]], validation_predictions)*100, digits=3, nsmall=2)))
 
 
 ```
@@ -128,8 +104,8 @@ cat(paste0("\nMAPE on the Validation Data:\t", format(mape(validation_labels[[1]
 ## Grafischer vergleich der vorhergesagten und der tatsächlichen Preise für die Trainings- und Testdaten
 
 # Zusammenstellung der Daten für die Plots
-data_train <- data.frame(prediction = training_predictions/1000, actual = training_labels[[1]]/1000)
-data_test <- data.frame(prediction = validation_predictions/1000, actual = validation_labels[[1]]/1000)
+data_train <- data.frame(prediction = training_predictions/1000, actual = training_label[[1]]/1000)
+data_test <- data.frame(prediction = validation_predictions/1000, actual = validation_label[[1]]/1000)
 
 # Plot der Ergebnisse der Trainingsdaten
 ggplot(data_train[1:100,]) +
@@ -155,7 +131,7 @@ ggplot(data_test[1:100,]) +
 ```{r}
 # Vorhersage für einen einzelnen Fall
 cat(paste0("Vorhergesagter Preis:\t", round(validation_predictions[100])))
-cat(paste0("\nTatsächlicher Preis:\t", validation_labels[[1]][100]))
+cat(paste0("\nTatsächlicher Preis:\t", validation_label[[1]][100]))
 
 
 ```
