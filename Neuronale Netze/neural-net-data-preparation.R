@@ -66,11 +66,11 @@ validation_features <-
 test_features <-
   prepared_data_shuffled %>% select(-label) %>% slice((n_training + n_validation + 1):n_total)
 
-training_label <-
+training_labels <-
   prepared_data_shuffled %>% select(label) %>% slice(1:n_training)
-validation_label <-
+validation_labels <-
   prepared_data_shuffled %>% select(label) %>% slice((n_training + 1):(n_training + n_validation))
-test_label <-
+test_labels <-
   prepared_data_shuffled %>% select(label) %>% slice((n_training + n_validation + 1):n_total)
 
 
@@ -81,9 +81,21 @@ cat("Validation features dimensions:",
     "\n")
 cat("Test features dimensions:", dim(test_features), "\n")
 cat("\n")
-cat("Training label dimensions:", dim(training_label), "\n")
-cat("Validation label dimensions:", dim(validation_label), "\n")
-cat("Test label dimensions:", dim(test_label), "\n")
+cat("Training labels dimensions:", dim(training_labels), "\n")
+cat("Validation labels dimensions:", dim(validation_labels), "\n")
+cat("Test labels dimensions:", dim(test_labels), "\n")
 
 ###################################################
+### Export of the prepared data ####
 
+# Create subdirectory for the csv files
+subdirectory <- "csv_data"
+dir.create(subdirectory)
+
+# Export of the prepared data to subdirectory
+write_csv(training_features, paste0(subdirectory, "/training_features.csv"))
+write_csv(validation_features, paste0(subdirectory, "/validation_features.csv"))
+write_csv(test_features, paste0(subdirectory, "/test_features.csv"))
+write_csv(training_labels, paste0(subdirectory, "/training_labels.csv"))
+write_csv(validation_labels, paste0(subdirectory, "/validation_labels.csv"))
+write_csv(test_labels, paste0(subdirectory, "/test_labels.csv"))

@@ -46,8 +46,8 @@ model.summary()
 model.compile(loss="mse", optimizer=Adam(learning_rate=0.001))
 
 # Schaetzung des Modells
-history = model.fit(r.training_features, r.training_label, epochs=200,
-                    validation_data = (r.validation_features, r.validation_label), verbose=0)
+history = model.fit(r.training_features, r.training_labels, epochs=200,
+                    validation_data = (r.validation_features, r.validation_labels), verbose=0)
 
 # Ggf. Speichern des geschaetzten Modells
 model.save("python_model.h5")
@@ -93,8 +93,8 @@ test_predictions <- py$model$predict(test_features)
 
 
 # Vergleich der Gütekriterien für die Traingings- und Testdaten
-cat(paste0("MAPE on the Training Data:\t", format(mape(training_label[[1]], training_predictions)*100, digits=3, nsmall=2)))
-cat(paste0("\nMAPE on the Validation Data:\t", format(mape(validation_label[[1]], validation_predictions)*100, digits=3, nsmall=2)))
+cat(paste0("MAPE on the Training Data:\t", format(mape(training_labels[[1]], training_predictions)*100, digits=3, nsmall=2)))
+cat(paste0("\nMAPE on the Validation Data:\t", format(mape(validation_labels[[1]], validation_predictions)*100, digits=3, nsmall=2)))
 
 
 ```
@@ -104,8 +104,8 @@ cat(paste0("\nMAPE on the Validation Data:\t", format(mape(validation_label[[1]]
 ## Grafischer vergleich der vorhergesagten und der tatsächlichen Preise für die Trainings- und Testdaten
 
 # Zusammenstellung der Daten für die Plots
-data_train <- data.frame(prediction = training_predictions/1000, actual = training_label[[1]]/1000)
-data_test <- data.frame(prediction = validation_predictions/1000, actual = validation_label[[1]]/1000)
+data_train <- data.frame(prediction = training_predictions/1000, actual = training_labels[[1]]/1000)
+data_test <- data.frame(prediction = validation_predictions/1000, actual = validation_labels[[1]]/1000)
 
 # Plot der Ergebnisse der Trainingsdaten
 ggplot(data_train[1:100,]) +
@@ -131,7 +131,7 @@ ggplot(data_test[1:100,]) +
 ```{r}
 # Vorhersage für einen einzelnen Fall
 cat(paste0("Vorhergesagter Preis:\t", round(validation_predictions[100])))
-cat(paste0("\nTatsächlicher Preis:\t", validation_label[[1]][100]))
+cat(paste0("\nTatsächlicher Preis:\t", validation_labels[[1]][100]))
 
 
 ```
